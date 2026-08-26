@@ -2,6 +2,7 @@ import json
 from hashlib import sha256
 
 import pytest
+
 from piblindhub.config import AppConfig, ConfigurationError
 
 

@@ -1,4 +1,5 @@
 import pytest
+
 from piblindhub.config import HardwareConfig
 from piblindhub.domain import Direction
 from piblindhub.hardware.base import HardwareFault

@@ -2,6 +2,7 @@ import json
 from types import SimpleNamespace
 
 import pytest
+
 from piblindhub import mqtt_bridge
 from piblindhub.config import AppConfig, ConfigurationError
 from piblindhub.ipc import ControlUnavailable

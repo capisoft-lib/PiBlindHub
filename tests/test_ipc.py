@@ -3,6 +3,7 @@ import threading
 
 import pytest
 from conftest import wait_until
+
 from piblindhub.config import HardwareConfig
 from piblindhub.controller import BlindController
 from piblindhub.domain import CommandLifecycle

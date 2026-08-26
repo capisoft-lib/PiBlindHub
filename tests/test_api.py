@@ -2,6 +2,7 @@ from hashlib import sha256
 
 import pytest
 from fastapi.testclient import TestClient
+
 from piblindhub import api
 from piblindhub.api import create_app
 from piblindhub.config import (
