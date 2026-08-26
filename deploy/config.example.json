@@ -1,0 +1,37 @@
+{
+  "hardware": {
+    "backend": "raspberry",
+    "motor_up_pin": 23,
+    "motor_down_pin": 24,
+    "button_up_pin": 25,
+    "button_down_pin": 27,
+    "relay_active_high": true,
+    "button_active_high": true,
+    "switch_dead_time_ms": 300,
+    "max_movement_seconds": 30.0,
+    "full_travel_seconds": 30.0,
+    "poll_interval_ms": 20
+  },
+  "paths": {
+    "state_database": "/var/lib/piblindhub/state.db",
+    "control_socket": "/run/piblindhub/control.sock"
+  },
+  "api": {
+    "host": "127.0.0.1",
+    "port": 8080,
+    "api_token_sha256": null,
+    "tls_certificate": null,
+    "tls_private_key": null
+  },
+  "mqtt": {
+    "enabled": false,
+    "host": "localhost",
+    "port": 8883,
+    "client_id": "piblindhub",
+    "base_topic": "piblindhub",
+    "username": null,
+    "password_environment": null,
+    "tls": true,
+    "ca_certificate": null
+  }
+}

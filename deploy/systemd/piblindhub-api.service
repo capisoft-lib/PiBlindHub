@@ -1,0 +1,31 @@
+[Unit]
+Description=PiBlindHub authenticated local Web/API gateway
+Documentation=https://github.com/capisoft-lib/PiBlindHub
+After=network.target piblindhub-control.service
+Requires=piblindhub-control.service
+
+[Service]
+Type=simple
+User=piblindhub-web
+Group=piblindhub-ipc
+Environment=PIBLINDHUB_CONFIG=/etc/piblindhub/config.json
+EnvironmentFile=/etc/piblindhub/piblindhub.env
+ExecStart=/opt/piblindhub/venv/bin/piblindhub-api
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=10
+UMask=0027
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+
+[Install]
+WantedBy=multi-user.target

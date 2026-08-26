@@ -1,0 +1,83 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "piblindhub"
+version = "2.0.0.dev0"
+description = "Fail-safe Raspberry Pi controller for an isolated two-wire motorised blind interface"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [{ name = "PiBlindHub contributors" }]
+keywords = ["raspberry-pi", "gpio", "blinds", "home-automation"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+  "fastapi>=0.104,<1",
+  "uvicorn>=0.24,<1",
+]
+
+[project.optional-dependencies]
+raspberry = ["RPi.GPIO>=0.7.1"]
+mqtt = ["paho-mqtt>=2,<3"]
+dev = [
+  "build>=1.2,<2",
+  "httpx>=0.25,<1",
+  "mypy>=1.7,<2",
+  "pytest>=7.4,<9",
+  "pytest-cov>=4,<7",
+  "ruff>=0.1,<1",
+]
+
+[project.scripts]
+piblindhub-control = "piblindhub.daemon:main"
+piblindhub-api = "piblindhub.api:main"
+piblindhub-mqtt = "piblindhub.mqtt_bridge:main"
+piblindhub-token = "piblindhub.token_cli:main"
+
+[project.urls]
+Homepage = "https://github.com/capisoft-lib/PiBlindHub"
+Repository = "https://github.com/capisoft-lib/PiBlindHub"
+Issues = "https://github.com/capisoft-lib/PiBlindHub/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["piblindhub*"]
+
+[tool.setuptools.package-data]
+piblindhub = ["py.typed", "web/index.html", "web/static/*.css", "web/static/*.js"]
+
+[tool.pytest.ini_options]
+addopts = "--strict-config --strict-markers"
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.9"
+packages = ["piblindhub"]
+check_untyped_defs = true
+disallow_untyped_defs = false
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_unreachable = true
+exclude = ["tests"]
+
+[[tool.mypy.overrides]]
+module = ["RPi.*", "paho.*"]
+ignore_missing_imports = true

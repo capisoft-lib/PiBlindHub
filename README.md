@@ -1,118 +1,85 @@
 # PiBlindHub
 
-An open-source Raspberry Pi hub for motorised blinds, featuring GPIO control, a Web UI, MQTT configuration, and API access.
+PiBlindHub is an open-source Raspberry Pi controller for one motorised blind using an
+isolated, polarity-reversing two-wire interface. The project is designed around safe
+failure: Web, MQTT, or process faults must not leave a direction output energized.
 
-## Project Overview
+> **Commissioning status:** the software safety architecture is implemented and tested
+> with fake GPIO. It must not drive a real blind until the electrical circuit, relay truth
+> table, independent cutoff, timings, and emergency stop have passed the commissioning
+> procedure.
 
-This project provides an upper layer management system for motorised store devices. It builds upon an existing Python application that controls store operations through three core methods: Open, Close, and Stop.
+## Safety model
 
-## Key Features
+- One small control daemon exclusively owns GPIO.
+- Both directions can never be requested together.
+- Every reversal is `STOP -> neutral delay -> other direction`.
+- `STOP` has queue priority and cancels a pending reversal.
+- Physical hold-to-move buttons override remote movement.
+- A local monotonic timeout cuts outputs without relying on the Web or MQTT services.
+- Startup, shutdown, signals, exceptions, and GPIO faults request both outputs inactive.
+- GPIO output readback is exposed separately from the requested state.
+- An interrupted movement restores `UNKNOWN`; the daemon never moves automatically at boot.
+- Sensorless positions are explicitly labelled `estimated`.
 
-- **Web UI**: Complete management interface with device control and configuration
-- **MQTT Integration**: Bidirectional communication for device status and commands
-- **Secure API**: RESTful API with API key authentication
-- **Security**: Default password system with mandatory first-login reset
-- **Configuration Management**: Centralized settings for all system components
+Software is only one protection layer. Normally-open relays, electrical interlocking,
+correct fusing/contact ratings, galvanic isolation, and an independent hardware timeout are
+deployment requirements. See [Hardware safety](docs/HARDWARE_SAFETY.md).
 
 ## Architecture
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Web UI        │    │   API Layer     │    │   MQTT Client   │
-│   (Frontend)    │◄──►│   (Backend)     │◄──►│   (Messaging)   │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         │                       │                       │
-         ▼                       ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Security      │    │   Device        │    │   Configuration │
-│   Layer         │    │   Controller    │    │   Manager       │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                │
-                                ▼
-                    ┌─────────────────┐
-                    │   Raspberry Pi  │
-                    │   Device App    │
-                    │   (src/raspberryapp) │
-                    └─────────────────┘
+```text
+Browser/API client       MQTT broker
+        |                     |
+        v                     v
+ piblindhub-api       piblindhub-mqtt       (no GPIO access)
+        |                     |
+        +------ Unix socket --+
+                  |
+                  v
+       piblindhub-control                (only GPIO owner)
+        | actor + timeout + SQLite |
+        +-----------+-------------+
+                    v
+          relay/optocoupler interface
 ```
 
-## Core Components
-
-### 1. Device Controller
-- **Open**: Opens the motorised store
-- **Close**: Closes the motorised store  
-- **Stop**: Emergency stop functionality
-
-### 2. Web UI
-- Device status monitoring
-- Manual control interface
-- Configuration management
-- User authentication
-- API key management
-
-### 3. MQTT Integration
-- Device status publishing
-- Command reception
-- Configuration synchronization
-- Real-time monitoring
-
-### 4. API Layer
-- RESTful endpoints for all operations
-- API key authentication
-- Device control endpoints
-- Configuration endpoints
-- Status and monitoring endpoints
-
-## Security Features
-
-- **Default Password System**: Initial login requires password reset
-- **API Key Authentication**: All API calls protected by generated keys
-- **Session Management**: Secure user sessions
-- **Input Validation**: Comprehensive data validation
-- **Access Control**: Role-based permissions
-
-## Technology Stack
-
-- **Backend**: Python (FastAPI/Flask)
-- **Frontend**: HTML/CSS/JavaScript (or modern framework)
-- **Database**: SQLite/PostgreSQL for configuration and logs
-- **MQTT**: paho-mqtt or similar
-- **Security**: JWT tokens, bcrypt for password hashing
-- **Platform**: Raspberry Pi OS
-
-## Getting Started
-
-1. Clone `https://github.com/capisoft-lib/PiBlindHub.git`
-2. Install dependencies: `pip install -r requirements.txt`
-3. Copy `env.example` to `.env` and replace every security placeholder
-4. Copy the files in `src/config/*.example.json` to their matching `*.json` names and customize them
-5. Run the web application: `python src/webapp/main.py`
-6. Access Web UI at `http://localhost:8080`
-7. Login with the configured credentials and reset the password
-
-## Default Credentials
-
-- **Username**: `admin`
-- **Password**: `changeme123` (must be changed on first login)
-
-## API Documentation
-
-API endpoints are available at `/api/docs` when running the application.
-
-## Configuration
-
-All configuration files are located in the `src/config/` directory:
-- `mqtt_config.json`: MQTT broker settings
-- `app_config.json`: Application settings
-- `security_config.json`: Security parameters
+The API and MQTT adapters only enqueue commands through a local Unix socket. Removing or
+crashing either adapter does not remove the local movement timeout or physical controls.
+Details are in [Architecture](docs/ARCHITECTURE.md).
 
 ## Development
 
-See `DEVELOPMENT.md` for detailed development guidelines and rules.
+PiBlindHub requires Python 3.9 or newer.
 
-## Open source
+```bash
+python -m venv .venv
+. .venv/bin/activate
+python -m pip install -e '.[dev,mqtt]'
+pytest
+ruff check .
+```
 
-PiBlindHub is released under the [MIT License](LICENSE). Its canonical public repository is https://github.com/capisoft-lib/PiBlindHub.
+The tests use fake hardware and never energize GPIO. A Raspberry installation uses:
 
-Runtime databases, logs, device identifiers, network settings, password hashes, and active secrets are intentionally excluded from version control.
+```bash
+sudo ./deploy/install.sh
+```
+
+The installer deliberately does **not** enable or start motor control. Continue with
+[Commissioning](docs/COMMISSIONING.md), then [Operations](docs/OPERATIONS.md).
+
+## API and UI
+
+The gateway binds to `127.0.0.1:8080` by default and requires a high-entropy bearer token.
+It refuses cleartext non-loopback exposure. Put it behind a trusted TLS reverse proxy or
+configure TLS before LAN access. See [API](docs/API.md).
+
+MQTT is optional, disabled by default, uses TLS by default, and accepts only `move_up`,
+`move_down`, and `stop`. It never imports a GPIO library.
+
+## Public project
+
+PiBlindHub is published at <https://github.com/capisoft-lib/PiBlindHub> under the
+[MIT License](LICENSE). Never commit runtime databases, logs, credentials, device-specific
+network data, tokens, private certificates, or an active `/etc/piblindhub` configuration.

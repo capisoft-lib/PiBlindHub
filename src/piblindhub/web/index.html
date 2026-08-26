@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PiBlindHub</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <p class="eyebrow">Contrôle local sécurisé</p>
+        <h1>PiBlindHub</h1>
+      </div>
+      <span id="connection" class="badge offline">Hors ligne</span>
+    </header>
+
+    <section id="token-panel" class="card">
+      <h2>Connexion</h2>
+      <p>Le jeton reste uniquement dans la session de cet onglet.</p>
+      <form id="token-form">
+        <label for="token">Jeton API</label>
+        <input id="token" name="token" type="password" autocomplete="off" required>
+        <button type="submit">Connecter</button>
+      </form>
+    </section>
+
+    <section id="controls" class="card hidden" aria-live="polite">
+      <div class="status-grid">
+        <div><span>État</span><strong id="state">—</strong></div>
+        <div><span>Position</span><strong id="position">Inconnue</strong></div>
+        <div><span>Sorties</span><strong id="outputs">Arrêtées</strong></div>
+        <div><span>Dernier arrêt</span><strong id="stop-reason">—</strong></div>
+      </div>
+
+      <p class="hint">Maintenir Monter ou Descendre. Relâcher envoie immédiatement STOP.</p>
+      <div class="control-grid">
+        <button id="up" class="movement" type="button">▲<span>Monter</span></button>
+        <button id="stop" class="stop" type="button">■<span>STOP</span></button>
+        <button id="down" class="movement" type="button">▼<span>Descendre</span></button>
+      </div>
+      <p id="message" class="message"></p>
+      <button id="disconnect" class="secondary" type="button">Oublier le jeton</button>
+    </section>
+  </main>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>

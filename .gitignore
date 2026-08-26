@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
+build/
+dist/
+*.egg-info/
 
 # Local environment and credentials
 .env
@@ -19,6 +22,7 @@ data/*
 logs/*
 !logs/.gitkeep
 *.db
+*.db-*
 *.sqlite*
 *.log
 
@@ -26,9 +30,13 @@ logs/*
 src/config/app_config.json
 src/config/mqtt_config.json
 src/config/security_config.json
+config.json
+deploy/config.json
+deploy/*.env
 
 # Local tooling and generated analysis
 .analysis/
+.local/
 .vs/
 .vscode/
 .idea/
@@ -46,4 +54,3 @@ install_valentina.bat
 # OS files
 .DS_Store
 Thumbs.db
-
