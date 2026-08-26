@@ -83,7 +83,7 @@ This project provides an upper layer management system for motorised store devic
 
 ## Getting Started
 
-1. Clone `https://github.com/capisoft-lib/ok-go-pour-PiBlindHub.git`
+1. Clone `https://github.com/capisoft-lib/PiBlindHub.git`
 2. Install dependencies: `pip install -r requirements.txt`
 3. Copy `env.example` to `.env` and replace every security placeholder
 4. Copy the files in `src/config/*.example.json` to their matching `*.json` names and customize them
@@ -113,6 +113,6 @@ See `DEVELOPMENT.md` for detailed development guidelines and rules.
 
 ## Open source
 
-PiBlindHub is released under the [MIT License](LICENSE). Its canonical public repository is https://github.com/capisoft-lib/ok-go-pour-PiBlindHub.
+PiBlindHub is released under the [MIT License](LICENSE). Its canonical public repository is https://github.com/capisoft-lib/PiBlindHub.
 
 Runtime databases, logs, device identifiers, network settings, password hashes, and active secrets are intentionally excluded from version control.
