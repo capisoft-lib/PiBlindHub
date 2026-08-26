@@ -1,0 +1,1 @@
+/usr/bin/python3 /home/device/sml/run.py

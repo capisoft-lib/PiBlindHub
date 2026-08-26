@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Runtime data
+data/*
+!data/.gitkeep
+logs/*
+!logs/.gitkeep
+*.db
+*.sqlite*
+*.log
+
+# Device-specific configuration
+src/config/app_config.json
+src/config/mqtt_config.json
+src/config/security_config.json
+
+# Local tooling and generated analysis
+.analysis/
+.vs/
+.vscode/
+.idea/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# Local backups and unrelated installers
+*.backup.*
+requirements_backup.txt
+install_valentina.bat
+
+# OS files
+.DS_Store
+Thumbs.db
+

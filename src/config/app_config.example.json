@@ -1,0 +1,56 @@
+{
+  "application": {
+    "name": "PiBlindHub",
+    "version": "1.0.0",
+    "debug": false,
+    "host": "0.0.0.0",
+    "port": 8080,
+    "workers": 1
+  },
+  "database": {
+    "type": "sqlite",
+    "path": "data/store_manager.db",
+    "echo": false,
+    "pool_size": 5,
+    "max_overflow": 10
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "file": "logs/app.log",
+    "max_size": "10MB",
+    "backup_count": 5
+  },
+  "device": {
+    "default_id": "blind_001",
+    "timeout": 30,
+    "retry_attempts": 3,
+    "retry_delay": 1
+  },
+  "api": {
+    "rate_limit": {
+      "requests_per_minute": 60,
+      "burst_size": 10
+    },
+    "cors": {
+      "origins": ["*"],
+      "methods": ["GET", "POST", "PUT", "DELETE"],
+      "headers": ["*"]
+    }
+  },
+  "web": {
+    "session_timeout": 3600,
+    "max_login_attempts": 5,
+    "lockout_duration": 300
+  },
+  "hotspot": {
+    "enabled": true,
+    "default_port": 15001,
+    "password": "change-me-before-use",
+    "channel": 7,
+    "dhcp_range_start": 2,
+    "dhcp_range_end": 254,
+    "auto_start_on_no_wifi": true
+  }
+}
+

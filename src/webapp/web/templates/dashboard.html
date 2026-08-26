@@ -1,0 +1,1111 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - PiBlindHub{% endblock %}
+
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="h3 mb-4">
+            <i class="bi bi-speedometer2 me-2"></i>Dashboard
+        </h1>
+    </div>
+</div>
+
+<!-- Notifications Section -->
+<div class="row mb-4" id="notificationsSection" style="display: none;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-bell me-2"></i>All Notifications
+                </h5>
+                <button class="btn btn-sm btn-outline-secondary" onclick="toggleNotificationList()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <div id="notificationList" class="notification-list" style="max-height: 300px; overflow-y: auto;">
+                    <!-- Full notification list will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Device Control Card -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-hdd-stack me-2"></i>Device Control
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- Action Buttons - Centered -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-center">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-success" id="openDeviceBtn" onclick="controlDevice('open')">
+                                    <i class="bi bi-unlock me-1"></i>Open
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="closeDeviceBtn" onclick="controlDevice('close')">
+                                    <i class="bi bi-lock me-1"></i>Close
+                                </button>
+                                <button type="button" class="btn btn-warning" id="stopDeviceBtn" onclick="controlDevice('stop')">
+                                    <i class="bi bi-stop me-1"></i>Stop
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Current Position - Centered -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="text-center">
+                            <div id="devicePosition" class="h4 text-muted">Position: Loading...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Visual Blinds Display -->
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="text-center">
+                            <div id="blindsVisualization" class="blinds-container">
+                                <!-- SVG will be inserted here -->
+                            </div>
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    <span id="positionText">0% = Fully Opened</span> | 
+                                    <span id="positionText2">100% = Fully Closed</span>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Power Loss Recovery Alert -->
+                <div id="powerLossAlert" class="alert alert-warning" style="display: none;">
+                    <h6><i class="bi bi-exclamation-triangle me-2"></i>Power Loss Recovery Required</h6>
+                    <p class="mb-2">The device experienced a power loss during the last movement. Please check the position and recalibrate if necessary.</p>
+                    <div id="powerLossDetails" class="small text-muted"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Connectivity Status Card -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-wifi me-2"></i>Connectivity Status
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                {% if network_status.wifi_connected %}
+                                    <i class="bi bi-wifi text-success" style="font-size: 1.5rem;"></i>
+                                {% else %}
+                                    <i class="bi bi-wifi-off text-muted" style="font-size: 1.5rem;"></i>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <h6 class="mb-1">WiFi Connection</h6>
+                                <span class="badge {% if network_status.wifi_connected %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {% if network_status.wifi_connected %}Connected{% else %}Disconnected{% endif %}
+                                </span>
+                                {% if network_status.wifi_connected %}
+                                <div class="mt-1">
+                                    {% if network_status.current_ssid %}
+                                    <small class="text-success">
+                                        <i class="bi bi-router me-1"></i>
+                                        <strong>{{ network_status.current_ssid }}</strong>
+                                    </small>
+                                    {% else %}
+                                    <small class="text-warning">
+                                        <i class="bi bi-question-circle me-1"></i>
+                                        Network name not available
+                                    </small>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                {% if network_status.lan_connected %}
+                                    <i class="bi bi-ethernet text-success" style="font-size: 1.5rem;"></i>
+                                {% else %}
+                                    <i class="bi bi-ethernet text-muted" style="font-size: 1.5rem;"></i>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <h6 class="mb-1">LAN Connection</h6>
+                                <span class="badge {% if network_status.lan_connected %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {% if network_status.lan_connected %}Connected{% else %}Disconnected{% endif %}
+                                </span>
+                                {% if network_status.lan_connected %}
+                                <div class="mt-1">
+                                    <small class="text-success">
+                                        <i class="bi bi-hdd-network me-1"></i>
+                                        <strong>{{ network_status.lan_interface }}</strong>
+                                    </small>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                {% if network_status.hotspot_active %}
+                                    <i class="bi bi-broadcast text-info" style="font-size: 1.5rem;"></i>
+                                {% else %}
+                                    <i class="bi bi-broadcast-pin text-muted" style="font-size: 1.5rem;"></i>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Hotspot Status</h6>
+                                <span class="badge {% if network_status.hotspot_active %}bg-info{% else %}bg-secondary{% endif %}">
+                                    {% if network_status.hotspot_active %}Active{% else %}Inactive{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                
+                {% if network_status.hotspot_active and network_status.hotspot_info %}
+                <div class="alert alert-info">
+                    <h6><i class="bi bi-info-circle me-2"></i>Hotspot Information</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Network Name:</strong> {{ network_status.hotspot_info.hotspot_name }}</p>
+                            <p class="mb-1"><strong>IP Address:</strong> {{ network_status.hotspot_info.hotspot_ip }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Port:</strong> {{ network_status.hotspot_info.hotspot_port }}</p>
+                            <p class="mb-1"><strong>Access URL:</strong> <a href="{{ network_status.hotspot_info.access_url }}" target="_blank">{{ network_status.hotspot_info.access_url }}</a></p>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-muted">
+                            <i class="bi bi-shield-lock me-1"></i>
+                            Password: MSM123456
+                        </small>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    
+    <!-- Recent Actions -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-activity me-2"></i>Recent Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if recent_actions %}
+                <div class="list-group list-group-flush">
+                    {% for action in recent_actions %}
+                    <div class="list-group-item px-0">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ action.action_type.value }}</h6>
+                            <small class="text-muted">
+                                {% if action.timestamp %}
+                                    {{ action.timestamp.strftime('%H:%M') }}
+                                {% endif %}
+                            </small>
+                        </div>
+                        <p class="mb-1">
+                            <strong>{{ action.device_id }}</strong>
+                            <span class="badge {% if action.status.value == 'COMPLETED' %}bg-success{% elif action.status.value == 'FAILED' %}bg-danger{% else %}bg-warning{% endif %} ms-2">
+                                {{ action.status.value }}
+                            </span>
+                        </p>
+                        {% if action.user_id %}
+                        <small class="text-muted">by {{ action.user_id }}</small>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-activity" style="font-size: 3rem;"></i>
+                    <p class="mt-2">No recent actions</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<style>
+.blinds-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    background: #f8f9fa;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.blinds-svg {
+    width: 100%;
+    height: 200px;
+}
+
+.blind-slat {
+    transition: all 0.3s ease;
+}
+
+.blind-slat.open {
+    opacity: 0.1;
+    transform: rotate(0deg);
+}
+
+.blind-slat.closed {
+    opacity: 1;
+    transform: rotate(0deg);
+}
+
+.blind-slat.partial {
+    opacity: 0.6;
+    transform: rotate(0deg);
+}
+
+.window-frame {
+    fill: #adb5bd;
+    stroke: #6c757d;
+    stroke-width: 2;
+}
+
+.blind-rail {
+    fill: #2c3e50;
+    stroke: #1a252f;
+    stroke-width: 1;
+}
+
+.blind-slat {
+    fill: #34495e;
+    stroke: #2c3e50;
+    stroke-width: 0.5;
+}
+
+.position-indicator {
+    fill: #e74c3c;
+    stroke: #c0392b;
+    stroke-width: 1;
+}
+</style>
+
+<script>
+// Notification management
+let notifications = [];
+let isUserScrolling = false;
+let notificationListElement = null;
+
+// Initialize notifications and device status
+document.addEventListener('DOMContentLoaded', function() {
+    notificationListElement = document.getElementById('notificationList');
+    
+    // Load initial notifications
+    loadNotifications();
+    
+    // Load initial device status
+    loadDeviceStatus();
+    
+    // Set up scroll detection
+    if (notificationListElement) {
+        notificationListElement.addEventListener('scroll', function() {
+            isUserScrolling = true;
+            // Reset scroll flag after 2 seconds of no scrolling
+            setTimeout(() => {
+                isUserScrolling = false;
+            }, 2000);
+        });
+    }
+    
+    // Auto-refresh device status every 5 seconds
+    setInterval(loadDeviceStatus, 5000);
+});
+
+function loadNotifications() {
+    // Mock notifications - replace with real API call
+    notifications = [
+        {
+            id: 1,
+            message: "Device store_001 is now online",
+            type: "success",
+            timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
+            icon: "bi-wifi"
+        },
+        {
+            id: 2,
+            message: "Password changed successfully",
+            type: "info",
+            timestamp: new Date(Date.now() - 1000 * 60 * 15), // 15 minutes ago
+            icon: "bi-shield-check"
+        },
+        {
+            id: 3,
+            message: "System backup completed",
+            type: "success",
+            timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
+            icon: "bi-cloud-check"
+        },
+        {
+            id: 4,
+            message: "New user login detected",
+            type: "warning",
+            timestamp: new Date(Date.now() - 1000 * 60 * 45), // 45 minutes ago
+            icon: "bi-person-plus"
+        },
+        {
+            id: 5,
+            message: "Device store_002 connection lost",
+            type: "danger",
+            timestamp: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
+            icon: "bi-wifi-off"
+        }
+    ];
+    
+    updateNotificationDisplay();
+}
+
+function addNewNotification() {
+    const newNotification = {
+        id: Date.now(),
+        message: `New notification: ${new Date().toLocaleTimeString()}`,
+        type: "info",
+        timestamp: new Date(),
+        icon: "bi-bell"
+    };
+    
+    notifications.unshift(newNotification); // Add to beginning (newest first)
+    updateNotificationDisplay();
+    
+    // Auto-scroll to top if user is not scrolling
+    if (!isUserScrolling && notificationListElement) {
+        notificationListElement.scrollTop = 0;
+    }
+}
+
+function updateNotificationDisplay() {
+    updateRecentNotifications();
+    updateFullNotificationList();
+    showNotificationBar();
+}
+
+function updateRecentNotifications() {
+    const recentContainer = document.getElementById('recentNotifications');
+    if (!recentContainer) return;
+    
+    const recentNotifications = notifications.slice(0, 3);
+    recentContainer.innerHTML = recentNotifications.map(notification => 
+        `<span class="badge bg-${notification.type} text-truncate" style="max-width: 200px;" title="${notification.message}">
+            <i class="bi ${notification.icon} me-1"></i>${notification.message}
+        </span>`
+    ).join('');
+}
+
+function updateFullNotificationList() {
+    if (!notificationListElement) return;
+    
+    notificationListElement.innerHTML = notifications.map(notification => `
+        <div class="notification-item p-3 border-bottom">
+            <div class="d-flex align-items-start">
+                <div class="me-3">
+                    <i class="bi ${notification.icon} text-${notification.type}" style="font-size: 1.2rem;"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="fw-semibold">${notification.message}</div>
+                    <small class="text-muted">${formatTimestamp(notification.timestamp)}</small>
+                </div>
+                <div class="ms-2">
+                    <span class="badge bg-${notification.type}">${notification.type}</span>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function showNotificationBar() {
+    const notificationBar = document.getElementById('notificationBar');
+    if (notificationBar && notifications.length > 0) {
+        notificationBar.style.display = 'block';
+    }
+}
+
+function toggleNotificationList() {
+    const notificationsSection = document.getElementById('notificationsSection');
+    if (notificationsSection) {
+        const isVisible = notificationsSection.style.display !== 'none';
+        notificationsSection.style.display = isVisible ? 'none' : 'block';
+        
+        // Removed auto-scroll to notifications section
+    }
+}
+
+function formatTimestamp(timestamp) {
+    const now = new Date();
+    const diff = now - timestamp;
+    const minutes = Math.floor(diff / (1000 * 60));
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    return `${days}d ago`;
+}
+
+// Device control functions
+function controlDevice(action) {
+    const button = document.getElementById(`${action}DeviceBtn`);
+    const originalText = button.innerHTML;
+    
+    // Show loading state
+    button.disabled = true;
+    button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Processing...';
+    
+    let endpoint = '';
+    let method = 'POST';
+    
+    switch(action) {
+        case 'open':
+            endpoint = '/api/device/open';
+            break;
+        case 'close':
+            endpoint = '/api/device/close';
+            break;
+        case 'stop':
+            endpoint = '/api/device/stop';
+            break;
+        default:
+            showAlert('danger', 'Invalid action');
+            button.disabled = false;
+            button.innerHTML = originalText;
+            return;
+    }
+    
+    fetch(endpoint, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', `Device ${action} command sent successfully`);
+            // Refresh device status after a short delay
+            setTimeout(() => {
+                loadDeviceStatus();
+            }, 1000);
+        } else {
+            showAlert('danger', data.error || 'Failed to send device command');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('danger', 'Error sending device command');
+    })
+    .finally(() => {
+        // Reset button state
+        button.disabled = false;
+        button.innerHTML = originalText;
+    });
+}
+
+// Load device status
+function loadDeviceStatus() {
+    fetch('/api/device/status')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.data) {
+                updateDeviceStatus(data.data);
+            } else {
+                updateDeviceStatus({ state: 'ERROR', position: null, is_moving: false });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading device status:', error);
+            updateDeviceStatus({ state: 'ERROR', position: null, is_moving: false });
+        });
+}
+
+// Update device status display
+function updateDeviceStatus(status) {
+    const stateElement = document.getElementById('deviceState');
+    const positionElement = document.getElementById('devicePosition');
+    const statusIcon = document.getElementById('deviceStatusIcon');
+    
+    if (stateElement) {
+        stateElement.textContent = status.state || 'Unknown';
+    }
+    
+    if (positionElement) {
+        const position = status.position !== null ? `${status.position.toFixed(1)}%` : 'Unknown';
+        positionElement.textContent = `Position: ${position}`;
+    }
+    
+    if (statusIcon) {
+        const state = status.state || 'UNKNOWN';
+        let badgeClass = 'bg-secondary';
+        let iconClass = 'bi-circle-fill';
+        
+        switch(state.toUpperCase()) {
+            case 'OPEN':
+                badgeClass = 'bg-success';
+                iconClass = 'bi-unlock-fill';
+                break;
+            case 'CLOSED':
+                badgeClass = 'bg-secondary';
+                iconClass = 'bi-lock-fill';
+                break;
+            case 'MOVING_UP':
+            case 'MOVING_DOWN':
+                badgeClass = 'bg-warning';
+                iconClass = 'bi-arrow-repeat';
+                break;
+            case 'ERROR':
+                badgeClass = 'bg-danger';
+                iconClass = 'bi-exclamation-triangle-fill';
+                break;
+        }
+        
+        statusIcon.className = `badge ${badgeClass}`;
+        statusIcon.innerHTML = `<i class="bi ${iconClass} me-1"></i>${state}`;
+    }
+    
+    // Update button states
+    const openBtn = document.getElementById('openDeviceBtn');
+    const closeBtn = document.getElementById('closeDeviceBtn');
+    const stopBtn = document.getElementById('stopDeviceBtn');
+    
+    const isMoving = status.is_moving || false;
+    const position = status.position !== null ? status.position : null;
+    
+    if (openBtn) {
+        // Disable "Open" button when already at 0% (fully opened) or when moving
+        openBtn.disabled = isMoving || position === 0.0;
+    }
+    if (closeBtn) {
+        // Disable "Close" button when already at 100% (fully closed) or when moving
+        closeBtn.disabled = isMoving || position === 100.0;
+    }
+    if (stopBtn) {
+        stopBtn.disabled = !isMoving;
+    }
+    
+    // Check for power loss recovery
+    if (status.power_loss_recovery && status.power_loss_recovery.recovery_needed) {
+        showPowerLossAlert(status.power_loss_recovery);
+    } else {
+        hidePowerLossAlert();
+    }
+}
+
+// Show power loss recovery alert
+function showPowerLossAlert(recoveryInfo) {
+    const alert = document.getElementById('powerLossAlert');
+    const details = document.getElementById('powerLossDetails');
+    
+    if (alert && details) {
+        let detailsText = '';
+        if (recoveryInfo.last_direction) {
+            detailsText += `Last direction: ${recoveryInfo.last_direction}<br>`;
+        }
+        if (recoveryInfo.estimated_position !== null) {
+            detailsText += `Estimated position: ${recoveryInfo.estimated_position.toFixed(1)}%<br>`;
+        }
+        detailsText += `Recommendation: ${recoveryInfo.recommendation}`;
+        
+        details.innerHTML = detailsText;
+        alert.style.display = 'block';
+    }
+}
+
+// Hide power loss recovery alert
+function hidePowerLossAlert() {
+    const alert = document.getElementById('powerLossAlert');
+    if (alert) {
+        alert.style.display = 'none';
+    }
+}
+
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const container = document.querySelector('main');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+// Service Status Management
+let serviceStatusInterval = null;
+
+// Load service status on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize blinds visualization
+    createBlindsVisualization();
+    
+    // Load device status
+    loadDeviceStatus();
+    
+    // Auto-refresh device status every 5 seconds
+    setInterval(loadDeviceStatus, 5000);
+    
+    loadServiceStatus();
+    
+    // Auto-refresh service status every 10 seconds
+    serviceStatusInterval = setInterval(() => {
+        loadServiceStatus();
+    }, 10000);
+});
+
+// Blinds visualization functions
+function createBlindsVisualization() {
+    const container = document.getElementById('blindsVisualization');
+    if (!container) return;
+    
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'blinds-svg');
+    svg.setAttribute('viewBox', '0 0 300 200');
+    
+    // Window frame
+    const frame = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    frame.setAttribute('class', 'window-frame');
+    frame.setAttribute('x', '20');
+    frame.setAttribute('y', '20');
+    frame.setAttribute('width', '260');
+    frame.setAttribute('height', '160');
+    frame.setAttribute('rx', '5');
+    svg.appendChild(frame);
+    
+    // Top rail
+    const topRail = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    topRail.setAttribute('class', 'blind-rail');
+    topRail.setAttribute('x', '30');
+    topRail.setAttribute('y', '30');
+    topRail.setAttribute('width', '240');
+    topRail.setAttribute('height', '8');
+    topRail.setAttribute('rx', '2');
+    svg.appendChild(topRail);
+    
+    // Bottom rail
+    const bottomRail = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    bottomRail.setAttribute('class', 'blind-rail');
+    bottomRail.setAttribute('x', '30');
+    bottomRail.setAttribute('y', '162');
+    bottomRail.setAttribute('width', '240');
+    bottomRail.setAttribute('height', '8');
+    bottomRail.setAttribute('rx', '2');
+    svg.appendChild(bottomRail);
+    
+    // Create blind slats (12 slats)
+    const slatCount = 12;
+    const slatHeight = 8;
+    const slatSpacing = 2;
+    const totalSlatArea = 160 - 16 - 16; // Total height minus rails
+    const availableHeight = totalSlatArea - (slatCount - 1) * slatSpacing;
+    const actualSlatHeight = availableHeight / slatCount;
+    
+    for (let i = 0; i < slatCount; i++) {
+        const slat = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        slat.setAttribute('class', 'blind-slat');
+        slat.setAttribute('id', `slat-${i}`);
+        slat.setAttribute('x', '30');
+        slat.setAttribute('y', 38 + i * (actualSlatHeight + slatSpacing));
+        slat.setAttribute('width', '240');
+        slat.setAttribute('height', actualSlatHeight);
+        slat.setAttribute('rx', '1');
+        svg.appendChild(slat);
+    }
+    
+    // Position indicator (red line showing current position)
+    const indicator = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    indicator.setAttribute('class', 'position-indicator');
+    indicator.setAttribute('id', 'position-indicator');
+    indicator.setAttribute('x1', '30');
+    indicator.setAttribute('x2', '270');
+    indicator.setAttribute('y1', '38');
+    indicator.setAttribute('y2', '38');
+    indicator.setAttribute('stroke-width', '3');
+    svg.appendChild(indicator);
+    
+    container.appendChild(svg);
+}
+
+function updateBlindsVisualization(position) {
+    if (position === null || position === undefined) return;
+    
+    const slatCount = 12;
+    const totalHeight = 160 - 16 - 16; // Total height minus rails
+    const indicator = document.getElementById('position-indicator');
+    
+    if (indicator) {
+        // Position 0% = fully opened (top), 100% = fully closed (bottom)
+        const yPosition = 38 + (position / 100) * totalHeight;
+        indicator.setAttribute('y1', yPosition);
+        indicator.setAttribute('y2', yPosition);
+    }
+    
+    // Update individual slats based on position
+    for (let i = 0; i < slatCount; i++) {
+        const slat = document.getElementById(`slat-${i}`);
+        if (!slat) continue;
+        
+        const slatPosition = (i / (slatCount - 1)) * 100; // 0 to 100
+        
+        // Remove existing classes
+        slat.classList.remove('open', 'closed', 'partial');
+        
+        if (position <= slatPosition) {
+            // This slat should be open (transparent)
+            slat.classList.add('open');
+        } else if (position >= slatPosition + (100 / slatCount)) {
+            // This slat should be closed (opaque)
+            slat.classList.add('closed');
+        } else {
+            // This slat is partially open
+            slat.classList.add('partial');
+        }
+    }
+}
+
+// Device Status Management
+function loadDeviceStatus() {
+    fetch('/api/device/status')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            updateDeviceStatus(data.data);
+        } else {
+            updateDeviceStatus({ state: 'ERROR', position: null, is_moving: false });
+        }
+    })
+    .catch(error => {
+        console.error('Error loading device status:', error);
+        updateDeviceStatus({ state: 'ERROR', position: null, is_moving: false });
+    });
+}
+
+function updateDeviceStatus(status) {
+    const positionElement = document.getElementById('devicePosition');
+    
+    if (positionElement) {
+        const position = status.position !== null ? `${status.position.toFixed(1)}%` : 'Unknown';
+        positionElement.textContent = `Position: ${position}`;
+    }
+    
+    // Update blinds visualization
+    if (status.position !== null) {
+        updateBlindsVisualization(status.position);
+    }
+    
+    // Update button states
+    const openBtn = document.getElementById('openDeviceBtn');
+    const closeBtn = document.getElementById('closeDeviceBtn');
+    const stopBtn = document.getElementById('stopDeviceBtn');
+    
+    const isMoving = status.is_moving || false;
+    const position = status.position !== null ? status.position : null;
+    
+    if (openBtn) {
+        // Disable "Open" button when already at 0% (fully opened) or when moving
+        openBtn.disabled = isMoving || position === 0.0;
+    }
+    if (closeBtn) {
+        // Disable "Close" button when already at 100% (fully closed) or when moving
+        closeBtn.disabled = isMoving || position === 100.0;
+    }
+    if (stopBtn) {
+        stopBtn.disabled = !isMoving;
+    }
+    
+    // Check for power loss recovery
+    if (status.power_loss_recovery && status.power_loss_recovery.recovery_needed) {
+        showPowerLossAlert(status.power_loss_recovery);
+    } else {
+        hidePowerLossAlert();
+    }
+}
+
+function controlDevice(action) {
+    const buttons = {
+        'open': document.getElementById('openDeviceBtn'),
+        'close': document.getElementById('closeDeviceBtn'),
+        'stop': document.getElementById('stopDeviceBtn')
+    };
+    
+    // Show loading state
+    const button = buttons[action];
+    const originalText = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = '<i class="bi bi-arrow-repeat spin me-1"></i>Processing...';
+    
+    fetch(`/api/device/${action}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', `Device ${action} command sent successfully`);
+            // Refresh status after a short delay
+            setTimeout(loadDeviceStatus, 1000);
+        } else {
+            showAlert('danger', `Failed to ${action} device: ${data.message || 'Unknown error'}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('danger', `Error sending ${action} command: ${error.message}`);
+    })
+    .finally(() => {
+        // Restore button state
+        button.disabled = false;
+        button.innerHTML = originalText;
+    });
+}
+
+function showPowerLossAlert(recoveryInfo) {
+    const alert = document.getElementById('powerLossAlert');
+    const details = document.getElementById('powerLossDetails');
+    
+    if (alert && details) {
+        details.innerHTML = `
+            <div class="small">
+                <div><strong>Last Direction:</strong> ${recoveryInfo.last_direction || 'Unknown'}</div>
+                <div><strong>Estimated Position:</strong> ${recoveryInfo.estimated_position !== null ? recoveryInfo.estimated_position + '%' : 'Unknown'}</div>
+                <div><strong>Recommendation:</strong> ${recoveryInfo.recommendation || 'Please calibrate the device'}</div>
+            </div>
+        `;
+        alert.style.display = 'block';
+    }
+}
+
+function hidePowerLossAlert() {
+    const alert = document.getElementById('powerLossAlert');
+    if (alert) {
+        alert.style.display = 'none';
+    }
+}
+
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    // Insert at the top of the content
+    const container = document.querySelector('.container-fluid');
+    if (container) {
+        container.insertBefore(alertDiv, container.firstChild);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+}
+
+// Load service status from API
+async function loadServiceStatus() {
+    try {
+        const response = await fetch('/api/services/status');
+        const data = await response.json();
+        
+        if (data.success) {
+            updateServiceStatusDisplay(data);
+            updateLastUpdateTime(data.timestamp);
+        } else {
+            showServiceStatusError('Failed to load service status');
+        }
+    } catch (error) {
+        console.error('Error loading service status:', error);
+        showServiceStatusError('Error loading service status');
+    }
+}
+
+// Update service status display
+function updateServiceStatusDisplay(data) {
+    const container = document.getElementById('serviceStatusCards');
+    if (!container) return;
+    
+    const services = data.services;
+    const overallStatus = data.overall_status;
+    
+    // Create service cards
+    const cardsHtml = Object.entries(services).map(([serviceName, serviceData]) => {
+        const statusClass = getServiceStatusClass(serviceData.status);
+        const icon = getServiceIcon(serviceName);
+        const lastSeen = serviceData.last_seen ? formatTimestamp(new Date(serviceData.last_seen)) : 'Unknown';
+        
+        return `
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="${icon} ${statusClass}" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h6 class="card-title text-capitalize">${serviceName} Service</h6>
+                        <span class="badge ${statusClass} mb-2">${serviceData.status}</span>
+                        <p class="card-text small text-muted mb-1">${serviceData.details || 'No details available'}</p>
+                        <small class="text-muted">Last seen: ${lastSeen}</small>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    // Add overall status card
+    const overallStatusClass = overallStatus === 'healthy' ? 'text-success' : 'text-warning';
+    const overallCard = `
+        <div class="col-12 mb-3">
+            <div class="alert ${overallStatus === 'healthy' ? 'alert-success' : 'alert-warning'} mb-0">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-shield-check me-2" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <strong>Overall System Status: ${overallStatus.toUpperCase()}</strong>
+                        <br>
+                        <small>All core services are ${overallStatus === 'healthy' ? 'operational' : 'experiencing issues'}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.innerHTML = overallCard + cardsHtml;
+}
+
+// Get service status CSS class
+function getServiceStatusClass(status) {
+    switch (status) {
+        case 'running':
+            return 'text-success';
+        case 'stopped':
+        case 'disconnected':
+            return 'text-secondary';
+        case 'warning':
+            return 'text-warning';
+        case 'error':
+            return 'text-danger';
+        default:
+            return 'text-muted';
+    }
+}
+
+// Get service icon
+function getServiceIcon(serviceName) {
+    const icons = {
+        'database': 'bi bi-database',
+        'lan': 'bi bi-ethernet',
+        'hotspot': 'bi bi-broadcast',
+        'wifi': 'bi bi-wifi'
+    };
+    return icons[serviceName] || 'bi bi-gear';
+}
+
+// Update last update time
+function updateLastUpdateTime(timestamp) {
+    const element = document.getElementById('lastUpdateTime');
+    if (element) {
+        const date = new Date(timestamp);
+        element.textContent = `Last updated: ${date.toLocaleTimeString()}`;
+    }
+}
+
+// Show service status error
+function showServiceStatusError(message) {
+    const container = document.getElementById('serviceStatusCards');
+    if (container) {
+        container.innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    ${message}
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Refresh service status manually
+function refreshServiceStatus() {
+    const button = event.target;
+    const originalText = button.innerHTML;
+    
+    button.disabled = true;
+    button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Refreshing...';
+    
+    loadServiceStatus().finally(() => {
+        button.disabled = false;
+        button.innerHTML = originalText;
+    });
+}
+
+// Format timestamp for display
+function formatTimestamp(date) {
+    const now = new Date();
+    const diff = now - date;
+    const minutes = Math.floor(diff / (1000 * 60));
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    return date.toLocaleDateString();
+}
+
+// Auto-refresh every 30 seconds (keep existing functionality)
+setInterval(() => {
+    if (window.location.pathname === '/' && !document.hidden) {
+        // Only reload if we're on the dashboard and page is visible
+        // Service status is handled separately above
+    }
+}, 30000);
+</script>
+{% endblock %}

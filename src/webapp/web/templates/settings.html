@@ -1,0 +1,708 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - PiBlindHub{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="h3 mb-4">
+            <i class="bi bi-gear me-2"></i>System Settings
+        </h1>
+    </div>
+</div>
+
+<!-- Device Position and Calibration -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-crosshair me-2"></i>Device Position & Calibration
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="currentPosition" class="form-label">Current Position</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="currentPosition" 
+                                       value="0" min="0" max="100" step="0.1" readonly>
+                                <span class="input-group-text">%</span>
+                    </div>
+                            <div class="form-text">Current store position (0% = fully open, 100% = fully closed)</div>
+                    </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Actions</label>
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-warning" id="calibrateBtn">
+                                    <i class="bi bi-gear me-1"></i>Calibrate Position
+                                </button>
+                </div>
+                            <div class="form-text">Calibration moves store to top and sets position to 0%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Connectivity Configuration -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-wifi me-2"></i>Connectivity Configuration
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- Tab Navigation -->
+                <ul class="nav nav-tabs" id="connectivityTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="wifi-tab" data-bs-toggle="tab" 
+                                data-bs-target="#wifi-pane" type="button" role="tab">
+                            <i class="bi bi-wifi me-1"></i>WiFi Connection
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="hotspot-tab" data-bs-toggle="tab" 
+                                data-bs-target="#hotspot-pane" type="button" role="tab">
+                            <i class="bi bi-broadcast me-1"></i>Hotspot Mode
+                        </button>
+                    </li>
+                </ul>
+                
+                <!-- Tab Content -->
+                <div class="tab-content" id="connectivityTabContent">
+                    <!-- WiFi Configuration -->
+                    <div class="tab-pane fade show active" id="wifi-pane" role="tabpanel">
+                        <div class="p-3">
+                            <form id="wifiConfigForm">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                                            <label for="wifiSSID" class="form-label">WiFi Network Name (SSID)</label>
+                                            <input type="text" class="form-control" id="wifiSSID" 
+                                                   placeholder="Enter WiFi network name">
+                                        </div>
+                        </div>
+                                    <div class="col-md-6">
+                        <div class="mb-3">
+                                            <label for="wifiPassword" class="form-label">WiFi Password</label>
+                            <div class="input-group">
+                                                <input type="password" class="form-control" id="wifiPassword" 
+                                                       placeholder="Enter WiFi password">
+                                                <button class="btn btn-outline-secondary" type="button" id="toggleWifiPassword">
+                                                    <i class="bi bi-eye" id="wifiPasswordIcon"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="wifiStaticIP" class="form-label">Static IP (Optional)</label>
+                                            <input type="text" class="form-control" id="wifiStaticIP" 
+                                                   placeholder="192.168.1.100">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="wifiGateway" class="form-label">Gateway (Optional)</label>
+                                            <input type="text" class="form-control" id="wifiGateway" 
+                                                   placeholder="192.168.1.1">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="wifiDNS" class="form-label">DNS (Optional)</label>
+                                            <input type="text" class="form-control" id="wifiDNS" 
+                                                   placeholder="8.8.8.8">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-wifi me-1"></i>Connect to WiFi
+                                </button>
+                            </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Hotspot Configuration -->
+                    <div class="tab-pane fade" id="hotspot-pane" role="tabpanel">
+                        <div class="p-3">
+                            <form id="hotspotConfigForm">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="hotspotSSID" class="form-label">Hotspot Name (SSID)</label>
+                                            <input type="text" class="form-control" id="hotspotSSID" 
+                                                   value="MotorisedStore" placeholder="Enter hotspot name">
+                                        </div>
+                                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                                            <label for="hotspotPassword" class="form-label">Hotspot Password</label>
+                                            <div class="input-group">
+                                                <input type="password" class="form-control" id="hotspotPassword" 
+                                                       value="MSM123456" placeholder="Enter hotspot password">
+                                                <button class="btn btn-outline-secondary" type="button" id="toggleHotspotPassword">
+                                                    <i class="bi bi-eye" id="hotspotPasswordIcon"></i>
+                                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="enableHotspot">
+                                            <label class="form-check-label" for="enableHotspot">
+                                                Enable Hotspot Mode
+                                            </label>
+                                        </div>
+                                        <div class="form-text">
+                                            <strong>Warning:</strong> Enabling hotspot will disconnect from WiFi and create a new access point.
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                <div class="alert alert-info">
+                                            <h6><i class="bi bi-info-circle me-2"></i>Hotspot Information</h6>
+                                            <p class="mb-1"><strong>Access URL:</strong> http://192.168.4.1:8080</p>
+                                            <p class="mb-0"><strong>Default Password:</strong> MSM123456</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <button type="submit" class="btn btn-info">
+                                        <i class="bi bi-broadcast me-1"></i>Configure Hotspot
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Admin Account Settings -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-person-gear me-2"></i>Admin Account Settings
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="adminPasswordForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="currentAdminPassword" class="form-label">Current Admin Password</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="currentAdminPassword" 
+                                           placeholder="Enter current password">
+                                    <button class="btn btn-outline-secondary" type="button" id="toggleCurrentPassword">
+                                        <i class="bi bi-eye" id="currentPasswordIcon"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="newAdminPassword" class="form-label">New Admin Password</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="newAdminPassword" 
+                                           placeholder="Enter new password" minlength="8">
+                                    <button class="btn btn-outline-secondary" type="button" id="toggleNewPassword">
+                                        <i class="bi bi-eye" id="newPasswordIcon"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text">Minimum 8 characters for security</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="confirmAdminPassword" class="form-label">Confirm New Password</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="confirmAdminPassword" 
+                                           placeholder="Confirm new password">
+                                    <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
+                                        <i class="bi bi-eye" id="confirmPasswordIcon"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">&nbsp;</label>
+                                <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-key me-1"></i>Change Admin Password
+                                </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Web Host Settings -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-server me-2"></i>Web Host Settings
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="webHostPort" class="form-label">Web Host Port</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="webHostPort" 
+                                       value="8080" min="1024" max="65535">
+                                <button class="btn btn-outline-primary" type="button" id="updatePortBtn">
+                                    <i class="bi bi-check-lg"></i> Update
+                        </button>
+                            </div>
+                            <div class="form-text">Port range: 1024-65535. Changes require application restart.</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Current Access URL</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="currentAccessURL" 
+                                       value="http://localhost:8080" readonly>
+                                <button class="btn btn-outline-secondary" type="button" id="copyURLBtn">
+                                    <i class="bi bi-clipboard"></i> Copy
+                        </button>
+                    </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+<!-- Password Change Success Modal -->
+<div class="modal fade" id="passwordChangeSuccessModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-check-circle me-2"></i>Password Changed Successfully
+                </h5>
+            </div>
+            <div class="modal-body text-center">
+                <div class="mb-3">
+                    <i class="bi bi-shield-check text-success" style="font-size: 3rem;"></i>
+                </div>
+                <h6>Your admin password has been changed successfully!</h6>
+                <p class="text-muted mb-0">For security reasons, you will be logged out and redirected to the login page.</p>
+                <p class="text-muted">Please use your new password to log in again.</p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-success" id="confirmLogoutBtn">
+                    <i class="bi bi-box-arrow-right me-1"></i>OK, Log Me Out
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Password Change Error Modal -->
+<div class="modal fade" id="passwordChangeErrorModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Password Change Failed
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="mb-3">
+                    <i class="bi bi-x-circle text-danger" style="font-size: 3rem;"></i>
+                </div>
+                <h6>Failed to change password</h6>
+                <p class="text-muted" id="passwordErrorMsg">An error occurred while changing your password.</p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Calibration Confirmation Modal -->
+<div class="modal fade" id="calibrationModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Confirm Calibration
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Warning:</strong> This will start the calibration process.</p>
+                <p>The store will move to the top position and set the position to 0%.</p>
+                <p class="text-muted">Make sure the store is clear of any obstacles before proceeding.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-warning" id="confirmCalibrationBtn">
+                    <i class="bi bi-gear me-1"></i>Start Calibration
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load current device position
+    loadDevicePosition();
+    
+    // Password visibility toggles
+    setupPasswordToggles();
+    
+    // Form submissions
+    setupFormSubmissions();
+    
+    // Auto-refresh position every 5 seconds
+    setInterval(loadDevicePosition, 5000);
+});
+
+function loadDevicePosition() {
+    fetch('/api/device/status')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.data && data.data.position !== null) {
+                document.getElementById('currentPosition').value = data.data.position.toFixed(1);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading device position:', error);
+        });
+}
+
+function setupPasswordToggles() {
+    // Admin password toggles
+    const toggles = [
+        { btn: 'toggleCurrentPassword', input: 'currentAdminPassword', icon: 'currentPasswordIcon' },
+        { btn: 'toggleNewPassword', input: 'newAdminPassword', icon: 'newPasswordIcon' },
+        { btn: 'toggleConfirmPassword', input: 'confirmAdminPassword', icon: 'confirmPasswordIcon' },
+        { btn: 'toggleWifiPassword', input: 'wifiPassword', icon: 'wifiPasswordIcon' },
+        { btn: 'toggleHotspotPassword', input: 'hotspotPassword', icon: 'hotspotPasswordIcon' }
+    ];
+    
+    toggles.forEach(toggle => {
+        const btn = document.getElementById(toggle.btn);
+        const input = document.getElementById(toggle.input);
+        const icon = document.getElementById(toggle.icon);
+        
+        if (btn && input && icon) {
+            btn.addEventListener('click', function() {
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.className = 'bi bi-eye-slash';
+                } else {
+                    input.type = 'password';
+                    icon.className = 'bi bi-eye';
+                }
+            });
+        }
+    });
+}
+
+function setupFormSubmissions() {
+    // Admin password form
+    const adminPasswordForm = document.getElementById('adminPasswordForm');
+    if (adminPasswordForm) {
+        adminPasswordForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            changeAdminPassword();
+        });
+    }
+    
+    // WiFi configuration form
+    const wifiConfigForm = document.getElementById('wifiConfigForm');
+    if (wifiConfigForm) {
+        wifiConfigForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            configureWiFi();
+        });
+    }
+    
+    // Hotspot configuration form
+    const hotspotConfigForm = document.getElementById('hotspotConfigForm');
+    if (hotspotConfigForm) {
+        hotspotConfigForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            configureHotspot();
+        });
+    }
+    
+    // Calibration button
+    const calibrateBtn = document.getElementById('calibrateBtn');
+    if (calibrateBtn) {
+        calibrateBtn.addEventListener('click', function() {
+            const modal = new bootstrap.Modal(document.getElementById('calibrationModal'));
+            modal.show();
+        });
+    }
+    
+    // Confirm calibration button
+    const confirmCalibrationBtn = document.getElementById('confirmCalibrationBtn');
+    if (confirmCalibrationBtn) {
+        confirmCalibrationBtn.addEventListener('click', function() {
+            startCalibration();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('calibrationModal'));
+            modal.hide();
+        });
+    }
+    
+    // Port update button
+    const updatePortBtn = document.getElementById('updatePortBtn');
+    if (updatePortBtn) {
+        updatePortBtn.addEventListener('click', function() {
+            updateServerPort();
+        });
+    }
+    
+    // Copy URL button
+    const copyURLBtn = document.getElementById('copyURLBtn');
+    if (copyURLBtn) {
+        copyURLBtn.addEventListener('click', function() {
+            const urlInput = document.getElementById('currentAccessURL');
+            urlInput.select();
+            document.execCommand('copy');
+            showAlert('success', 'URL copied to clipboard!');
+        });
+    }
+    
+    // Logout confirmation
+    const confirmLogoutBtn = document.getElementById('confirmLogoutBtn');
+    if (confirmLogoutBtn) {
+        confirmLogoutBtn.addEventListener('click', function() {
+            window.location.href = '/login';
+        });
+    }
+}
+
+function changeAdminPassword() {
+    const currentPassword = document.getElementById('currentAdminPassword').value;
+    const newPassword = document.getElementById('newAdminPassword').value;
+    const confirmPassword = document.getElementById('confirmAdminPassword').value;
+    
+    // Validation
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        showAlert('danger', 'Please fill in all password fields');
+        return;
+    }
+    
+    if (newPassword.length < 8) {
+        showAlert('danger', 'New password must be at least 8 characters long');
+        return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+        showAlert('danger', 'New password and confirmation do not match');
+        return;
+    }
+    
+    // Show loading state
+    const submitBtn = document.querySelector('#adminPasswordForm button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Changing...';
+    
+    fetch('/api/admin/change-password', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            current_password: currentPassword,
+            new_password: newPassword
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('adminPasswordForm').reset();
+            const successModal = new bootstrap.Modal(document.getElementById('passwordChangeSuccessModal'));
+            successModal.show();
+        } else {
+            document.getElementById('passwordErrorMsg').textContent = data.error || 'Failed to change admin password';
+            const errorModal = new bootstrap.Modal(document.getElementById('passwordChangeErrorModal'));
+            errorModal.show();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('passwordErrorMsg').textContent = 'Network error occurred while changing password';
+        const errorModal = new bootstrap.Modal(document.getElementById('passwordChangeErrorModal'));
+        errorModal.show();
+    })
+    .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    });
+}
+
+function configureWiFi() {
+    const ssid = document.getElementById('wifiSSID').value;
+    const password = document.getElementById('wifiPassword').value;
+    const staticIP = document.getElementById('wifiStaticIP').value;
+    const gateway = document.getElementById('wifiGateway').value;
+    const dns = document.getElementById('wifiDNS').value;
+    
+    if (!ssid) {
+        showAlert('danger', 'Please enter WiFi network name (SSID)');
+        return;
+    }
+    
+    showAlert('info', 'WiFi configuration functionality will be implemented');
+}
+
+function configureHotspot() {
+    const ssid = document.getElementById('hotspotSSID').value;
+    const password = document.getElementById('hotspotPassword').value;
+    const enabled = document.getElementById('enableHotspot').checked;
+    
+    if (!ssid) {
+        showAlert('danger', 'Please enter hotspot name (SSID)');
+        return;
+    }
+    
+    if (enabled && !password) {
+        showAlert('danger', 'Please enter hotspot password');
+        return;
+    }
+    
+    showAlert('info', 'Hotspot configuration functionality will be implemented');
+}
+
+function startCalibration() {
+    const calibrateBtn = document.getElementById('calibrateBtn');
+    const originalText = calibrateBtn.innerHTML;
+    calibrateBtn.disabled = true;
+    calibrateBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Calibrating...';
+    
+    fetch('/api/device/calibrate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', 'Calibration started successfully');
+        } else {
+            showAlert('danger', data.error || 'Failed to start calibration');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('danger', 'Error starting calibration');
+    })
+    .finally(() => {
+        calibrateBtn.disabled = false;
+        calibrateBtn.innerHTML = originalText;
+    });
+}
+
+function updateServerPort() {
+    const portInput = document.getElementById('webHostPort');
+    const updateBtn = document.getElementById('updatePortBtn');
+    const newPort = parseInt(portInput.value);
+    
+    if (!newPort || newPort < 1024 || newPort > 65535) {
+        showAlert('danger', 'Please enter a valid port number between 1024 and 65535');
+        return;
+    }
+    
+    const originalText = updateBtn.innerHTML;
+    updateBtn.disabled = true;
+    updateBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Updating...';
+    
+    fetch('/api/settings/update-port', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            port: newPort
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', `Port updated to ${newPort}. Application restart required for changes to take effect.`);
+            document.getElementById('currentAccessURL').value = `http://localhost:${newPort}`;
+        } else {
+            showAlert('danger', data.error || 'Failed to update port');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('danger', 'Network error occurred while updating port');
+    })
+    .finally(() => {
+        updateBtn.disabled = false;
+        updateBtn.innerHTML = originalText;
+    });
+}
+
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'info' ? 'info-circle' : 'exclamation-triangle'} me-2"></i>${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const container = document.querySelector('main');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

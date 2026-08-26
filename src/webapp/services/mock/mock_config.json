@@ -1,0 +1,67 @@
+{
+  "device": {
+    "device_id": "store-001",
+    "initial_position": 35.0,
+    "initial_state": "partial",
+    "movement_speed": 2.0,
+    "calibration_time": 3.0
+  },
+  "scenarios": {
+    "normal_operation": {
+      "description": "Normal device operation with realistic timing",
+      "movement_delay": 2.0,
+      "calibration_delay": 3.0,
+      "error_rate": 0.0
+    },
+    "slow_operation": {
+      "description": "Slower device for testing UI responsiveness",
+      "movement_delay": 5.0,
+      "calibration_delay": 8.0,
+      "error_rate": 0.0
+    },
+    "error_prone": {
+      "description": "Device with occasional errors for testing error handling",
+      "movement_delay": 2.0,
+      "calibration_delay": 3.0,
+      "error_rate": 0.2
+    },
+    "power_loss_simulation": {
+      "description": "Simulate power loss scenarios",
+      "movement_delay": 2.0,
+      "calibration_delay": 3.0,
+      "error_rate": 0.0,
+      "power_loss_after_movement": true,
+      "power_loss_probability": 0.1
+    }
+  },
+  "test_positions": [
+    {
+      "name": "Fully Open",
+      "position": 0.0,
+      "description": "Store is completely open"
+    },
+    {
+      "name": "Quarter Closed",
+      "position": 25.0,
+      "description": "Store is 25% closed"
+    },
+    {
+      "name": "Half Closed",
+      "position": 50.0,
+      "description": "Store is 50% closed"
+    },
+    {
+      "name": "Three Quarters Closed",
+      "position": 75.0,
+      "description": "Store is 75% closed"
+    },
+    {
+      "name": "Fully Closed",
+      "position": 100.0,
+      "description": "Store is completely closed"
+    }
+  ],
+  "current_scenario": "normal_operation",
+  "debug_mode": true,
+  "log_level": "INFO"
+}
